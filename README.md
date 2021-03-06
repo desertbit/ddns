@@ -13,7 +13,7 @@ keys:
 ```
 
 ### Systemd Service Sample with Traefik Proxy
-```toml
+```ini
 [Unit]
 Description=DynDNS Service
 After=docker.service
@@ -44,7 +44,7 @@ ExecStop=/usr/bin/docker stop ddns
 ```
 
 ## Client
-```toml
+```ini
 [Unit]
 Description=DynDNS Service
 After=docker.service
