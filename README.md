@@ -7,7 +7,7 @@ Simple dynamic DNS service for A and AAAA records. The client updates the IP rec
 
 ### Server Config
 ```yaml
-ttl: 1m
+ttl: 2m
 keys:
     foo.sample.com: "RANDOM_60_CHAR_KEY_HERE"
 ```
@@ -87,8 +87,19 @@ table ip router {
 }
 ```
 
+## DNS Setup
+
+Given your domain is sample.com, log in to your domain hoster and create a subdomain with a dedicated NS record that points to your newly created DNS. The NS record itself should point to a A record that is also created, which again points to the IP address of your DNS, like this:
+
+```
+foo                      IN NS      ns
+ns                       IN A       <put ipv4 of dns server here>
+ns                       IN AAAA    <optional, put ipv6 of dns server here>
+```
+
 ## Credits
 - http://mkaczanowski.com/golang-build-dynamic-dns-service-go
+- https://www.davd.io/build-your-own-dynamic-dns-in-5-minutes/
 - https://github.com/muka/ddns
 
 ## License
