@@ -1,0 +1,5 @@
+.vscode
+.idea
+/cmd/ddns/ddns
+/cmd/ddns/ddns.db
+/cmd/ddns/ddns.yaml
