@@ -69,6 +69,16 @@ ExecStart=/usr/bin/docker run \
 ExecStop=/usr/bin/docker stop ddns
 ```
 
+## DNS Setup
+
+Given your domain is sample.com, log in to your domain hoster and create a subdomain with a dedicated NS record that points to your newly created DNS. The NS record itself should point to a A record that is also created, which again points to the IP address of your DNS, like this:
+
+```
+foo                      IN NS      ns
+ns                       IN A       <put ipv4 of dns server here>
+ns                       IN AAAA    <optional, put ipv6 of dns server here>
+```
+
 ## SystemD ResolveD Port Issue
 systemd-resolved uses port 53. Instead of disabling this service, remap incoming
 packets from wan to a new port. The docker container will listen on this new port.
@@ -85,16 +95,6 @@ table ip router {
         type nat hook postrouting priority 100;
     }
 }
-```
-
-## DNS Setup
-
-Given your domain is sample.com, log in to your domain hoster and create a subdomain with a dedicated NS record that points to your newly created DNS. The NS record itself should point to a A record that is also created, which again points to the IP address of your DNS, like this:
-
-```
-foo                      IN NS      ns
-ns                       IN A       <put ipv4 of dns server here>
-ns                       IN AAAA    <optional, put ipv6 of dns server here>
 ```
 
 ## Credits
