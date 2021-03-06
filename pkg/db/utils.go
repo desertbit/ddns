@@ -14,6 +14,9 @@ func Key(domain string, rtype uint16) (k string, err error) {
 		return
 	}
 
+	// Ensure it is lower case only.
+	domain = strings.ToLower(domain)
+
 	// Reverse domain, starting from top-level domain
 	// eg. "com.desertbit.test"
 	labels := dns.SplitDomainName(domain)

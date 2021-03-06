@@ -69,17 +69,19 @@ func (s *Server) parseQuery(m *dns.Msg) {
 			continue
 		}
 
+		log.Debug().Str("name", q.Name).Uint16("type", q.Qtype).Msg("dns query")
+
 		rr, err := s.getRecord(q.Name, q.Qtype)
 		if err != nil {
-			if err != db.ErrNotFound {
+			if err == db.ErrNotFound {
+				log.Debug().Str("name", q.Name).Uint16("type", q.Qtype).Msg("no record found")
+			} else {
 				log.Error().Err(err).Str("name", q.Name).Uint16("type", q.Qtype).Msg("failed to get record")
 			}
 			continue
 		}
 
-		if rr.Header().Name == q.Name {
-			m.Answer = append(m.Answer, rr)
-		}
+		m.Answer = append(m.Answer, rr)
 	}
 }
 
