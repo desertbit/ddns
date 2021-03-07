@@ -1,10 +1,17 @@
 package dns
 
 import (
+	"time"
+
 	"github.com/desertbit/closer/v3"
 	"github.com/desertbit/ddns/pkg/db"
 	"github.com/miekg/dns"
 	"github.com/rs/zerolog/log"
+)
+
+const (
+	readTimeout  = 4 * time.Second
+	writeTimeout = 4 * time.Second
 )
 
 type Server struct {
@@ -20,12 +27,16 @@ func NewServer(cl closer.Closer, udpListenAddr, tcpListenAddr string, d *db.DB) 
 		Closer: cl,
 		d:      d,
 		us: &dns.Server{
-			Net:  "udp",
-			Addr: udpListenAddr,
+			Net:          "udp",
+			Addr:         udpListenAddr,
+			ReadTimeout:  readTimeout,
+			WriteTimeout: writeTimeout,
 		},
 		ts: &dns.Server{
-			Net:  "tcp",
-			Addr: tcpListenAddr,
+			Net:          "tcp",
+			Addr:         tcpListenAddr,
+			ReadTimeout:  readTimeout,
+			WriteTimeout: writeTimeout,
 		},
 	}
 	s.us.Handler = s
@@ -63,13 +74,14 @@ func (s *Server) serveTCP() {
 }
 
 // ServeDNS implements the dns server handler.
-func (s *Server) ServeDNS(w dns.ResponseWriter, request *dns.Msg) {
+func (s *Server) ServeDNS(w dns.ResponseWriter, req *dns.Msg) {
 	m := new(dns.Msg)
-	m.SetReply(request)
+	m.SetReply(req)
 	m.Compress = false
 
-	switch request.Opcode {
+	switch req.Opcode {
 	case dns.OpcodeQuery:
+		m.Authoritative = true
 		s.parseQuery(m)
 	}
 
