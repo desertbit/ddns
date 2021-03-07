@@ -70,7 +70,6 @@ func (s *Server) ServeDNS(w dns.ResponseWriter, request *dns.Msg) {
 
 	switch request.Opcode {
 	case dns.OpcodeQuery:
-		m.Authoritative = true
 		s.parseQuery(m)
 	}
 
