@@ -10,37 +10,54 @@ import (
 type Server struct {
 	closer.Closer
 
-	d *db.DB
-	s *dns.Server
+	d  *db.DB
+	us *dns.Server
+	ts *dns.Server
 }
 
-func NewServer(cl closer.Closer, listenAddr string, d *db.DB) (s *Server) {
+func NewServer(cl closer.Closer, udpListenAddr, tcpListenAddr string, d *db.DB) (s *Server) {
 	s = &Server{
 		Closer: cl,
 		d:      d,
-		s: &dns.Server{
+		us: &dns.Server{
 			Net:  "udp",
-			Addr: listenAddr,
+			Addr: udpListenAddr,
+		},
+		ts: &dns.Server{
+			Net:  "tcp",
+			Addr: tcpListenAddr,
 		},
 	}
-	s.s.Handler = s
-	s.OnClosing(func() error {
-		return s.s.Shutdown()
-	})
+	s.us.Handler = s
+	s.ts.Handler = s
+	s.OnClosing(s.us.Shutdown)
+	s.OnClosing(s.ts.Shutdown)
 	return
 }
 
 func (s *Server) Run() {
-	log.Info().Str("listenAddr", s.s.Addr).Msg("dns server running")
-	go s.serve()
+	log.Info().Str("listenAddr", s.us.Addr).Msg("udp dns server running")
+	log.Info().Str("listenAddr", s.ts.Addr).Msg("tcp dns server running")
+	go s.serveUDP()
+	go s.serveTCP()
 }
 
-func (s *Server) serve() {
+func (s *Server) serveUDP() {
 	defer s.Close_()
 
-	err := s.s.ListenAndServe()
+	err := s.us.ListenAndServe()
 	if err != nil {
-		log.Error().Err(err).Msg("dns ListenAndServe failed")
+		log.Error().Err(err).Msg("dns udp ListenAndServe failed")
+		return
+	}
+}
+
+func (s *Server) serveTCP() {
+	defer s.Close_()
+
+	err := s.ts.ListenAndServe()
+	if err != nil {
+		log.Error().Err(err).Msg("dns tcp ListenAndServe failed")
 		return
 	}
 }

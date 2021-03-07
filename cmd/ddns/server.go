@@ -21,8 +21,9 @@ func init() {
 		Flags: func(f *grumble.Flags) {
 			f.String("d", "db", "./ddns.db", "path to record database")
 			f.String("c", "conf", "./ddns.yaml", "path to config file")
-			f.StringL("dnsListenAddr", ":53", "dns udp listen address")
-			f.StringL("apiListenAddr", ":80", "http api listen address")
+			f.StringL("dnsUDPAddr", ":53", "dns udp listen address")
+			f.StringL("dnsTCPAddr", ":53", "dns tcp listen address")
+			f.StringL("apiAddr", ":80", "http api listen address")
 		},
 		Run: runServer,
 	})
@@ -38,14 +39,14 @@ func runServer(ctx *grumble.Context) (err error) {
 	}
 
 	// Start the api http server.
-	as, err := api.NewServer(cl.CloserTwoWay(), ctx.Flags.String("apiListenAddr"), ctx.Flags.String("conf"), d)
+	as, err := api.NewServer(cl.CloserTwoWay(), ctx.Flags.String("apiAddr"), ctx.Flags.String("conf"), d)
 	if err != nil {
 		return fmt.Errorf("failed to create api server: %w", err)
 	}
 	as.Run()
 
 	// Start the dns server.
-	ds := dns.NewServer(cl.CloserTwoWay(), ctx.Flags.String("dnsListenAddr"), d)
+	ds := dns.NewServer(cl.CloserTwoWay(), ctx.Flags.String("dnsUDPAddr"), ctx.Flags.String("dnsTCPAddr"), d)
 	ds.Run()
 
 	// Wait for closed or signal.

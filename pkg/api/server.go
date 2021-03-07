@@ -37,9 +37,7 @@ func NewServer(cl closer.Closer, listenAddr, configPath string, d *db.DB) (s *Se
 		},
 	}
 	s.s.Handler = s
-	s.OnClosing(func() error {
-		return s.s.Close()
-	})
+	s.OnClosing(s.s.Close)
 	return
 }
 

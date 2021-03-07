@@ -16,4 +16,5 @@ ENTRYPOINT ["/ddns"]
 CMD ["server"]
 
 EXPOSE 53/udp
+EXPOSE 53/tcp
 EXPOSE 80/tcp

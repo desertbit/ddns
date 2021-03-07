@@ -31,6 +31,7 @@ ExecStartPre=-/usr/bin/docker pull desertbit/ddns
 ExecStart=/usr/bin/docker run \
   --name ddns \
   -p 53:53/udp \
+  -p 53:53/tcp \
   --label "traefik.enable=true" \
   --label "traefik.http.routers.ddns.rule=Host(`ns.sample.com`)" \
   --label "traefik.http.services.ddns.loadbalancer.server.port=80" \
