@@ -63,14 +63,18 @@ func (s *Server) serveTCP() {
 }
 
 // ServeDNS implements the dns server handler.
-func (s *Server) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
+func (s *Server) ServeDNS(w dns.ResponseWriter, request *dns.Msg) {
 	m := new(dns.Msg)
-	m.SetReply(r)
+	m.SetReply(request)
 	m.Compress = false
 
-	switch r.Opcode {
+	switch request.Opcode {
 	case dns.OpcodeQuery:
-		s.parseQuery(m)
+		m.Authoritative = true
+		found := s.parseQuery(m)
+		if !found {
+			m.SetRcode(request, dns.RcodeNameError)
+		}
 	}
 
 	err := w.WriteMsg(m)
@@ -79,7 +83,8 @@ func (s *Server) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	}
 }
 
-func (s *Server) parseQuery(m *dns.Msg) {
+func (s *Server) parseQuery(m *dns.Msg) bool {
+	found := 0
 	for _, q := range m.Question {
 		if q.Qtype != dns.TypeA && q.Qtype != dns.TypeAAAA {
 			log.Warn().Str("name", q.Name).Uint16("type", q.Qtype).Msg("invalid request")
@@ -99,7 +104,9 @@ func (s *Server) parseQuery(m *dns.Msg) {
 		}
 
 		m.Answer = append(m.Answer, rr)
+		found++
 	}
+	return found > 0
 }
 
 func (s *Server) getRecord(domain string, rtype uint16) (rr dns.RR, err error) {

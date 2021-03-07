@@ -102,6 +102,7 @@ table ip router {
 - http://mkaczanowski.com/golang-build-dynamic-dns-service-go
 - https://www.davd.io/build-your-own-dynamic-dns-in-5-minutes/
 - https://github.com/muka/ddns
+- https://serverfault.com/questions/804492/dns-servfail-at-some-of-nameservers/804526
 
 ## License
 MIT License
