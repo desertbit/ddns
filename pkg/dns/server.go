@@ -71,10 +71,7 @@ func (s *Server) ServeDNS(w dns.ResponseWriter, request *dns.Msg) {
 	switch request.Opcode {
 	case dns.OpcodeQuery:
 		m.Authoritative = true
-		found := s.parseQuery(m)
-		if !found {
-			m.SetRcode(request, dns.RcodeNameError)
-		}
+		s.parseQuery(m)
 	}
 
 	err := w.WriteMsg(m)
@@ -83,8 +80,7 @@ func (s *Server) ServeDNS(w dns.ResponseWriter, request *dns.Msg) {
 	}
 }
 
-func (s *Server) parseQuery(m *dns.Msg) bool {
-	found := 0
+func (s *Server) parseQuery(m *dns.Msg) {
 	for _, q := range m.Question {
 		if q.Qtype != dns.TypeA && q.Qtype != dns.TypeAAAA {
 			log.Warn().Str("name", q.Name).Uint16("type", q.Qtype).Msg("invalid request")
@@ -104,9 +100,7 @@ func (s *Server) parseQuery(m *dns.Msg) bool {
 		}
 
 		m.Answer = append(m.Answer, rr)
-		found++
 	}
-	return found > 0
 }
 
 func (s *Server) getRecord(domain string, rtype uint16) (rr dns.RR, err error) {
