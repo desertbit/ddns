@@ -1,3 +1,6 @@
+version: 2
+project: ddns
+
 env:
     DOCKERREPO: desertbit/ddns
     DOCKERTAG:  latest
